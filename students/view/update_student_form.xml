@@ -1,0 +1,20 @@
+<form>
+   <label name="YEAR"/>
+   <field name="YEAR"/>
+   <label name="SchoolID"/>
+   <field name="SchoolID"/>
+   <label name="ClassID"/>
+   <field name="ClassID"/>
+   <label name="StudentID"/>
+   <field name="StudentID"/>
+   <label name="IncludeValidPayments"/>
+   <field name="IncludeValidPayments"/>
+   <label name="IncludeDraftPayments"/>
+   <field name="IncludeDraftPayments"/>
+   <label name="IncludeCancelPayments"/>
+   <field name="IncludeCancelPayments"/>
+   <label name="IncludeReduction"/>
+   <field name="IncludeReduction"/>
+   <label name="Requete"/>
+   <field name="Requete"/>
+</form>

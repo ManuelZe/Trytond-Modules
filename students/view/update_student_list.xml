@@ -1,0 +1,10 @@
+<tree>
+   <field name="YEAR"/>
+   <field name="SchoolID"/>
+   <field name="ClassID"/>
+   <field name="StudentID"/>
+   <field name="IncludeValidPayments"/>
+   <field name="IncludeDraftPayments"/>
+   <field name="IncludeCancelPayments"/>
+   <field name="IncludeReduction"/>
+</tree>

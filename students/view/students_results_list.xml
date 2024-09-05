@@ -1,0 +1,10 @@
+<tree>
+   <field name="nom"/>
+   <field name="prenom"/>
+   <field name="gender2"/>
+   <field name="classe"/>
+   <field name="annee"/>
+   <field name="matricule"/>
+   <field name="payment_date"/>
+   <field name="frais_medicaux"/>
+</tree>

@@ -1,0 +1,105 @@
+<tryton>
+   <data>
+      <record model="ir.ui.view" id="update_student_view_form">
+         <field name="model">url.parameters</field>
+         <field name="type">form</field>
+         <field name="name">update_student_form</field>
+      </record>
+
+      <record model="ir.ui.view" id="update_student_view_list">
+         <field name="model">url.parameters</field>
+         <field name="type">tree</field>
+         <field name="name">update_student_list</field>
+      </record>
+
+      <record model="ir.action.act_window" id="act_student_request_form">
+         <field name="name">Requests Students - IUC</field>
+         <field name="res_model">url.parameters</field>
+      </record>
+      <record model="ir.action.act_window.view" id="act_student_request_form_view1">
+         <field name="sequence" eval="10"/>
+         <field name="view" ref="update_student_view_list"/>
+         <field name="act_window" ref="act_student_request_form"/>
+      </record>
+      <record model="ir.action.act_window.view" id="act_student_request_form_view2">
+         <field name="sequence" eval="20"/>
+         <field name="view" ref="update_student_view_form"/>
+         <field name="act_window" ref="act_student_request_form"/>
+      </record>
+
+      <menuitem
+         name="Update Students"
+         sequence="50"
+         id="menu_update_student"/>
+      <menuitem
+         parent="menu_update_student"
+         action="act_student_request_form"
+         sequence="10"
+         id="menu_student_request_form"/>
+
+         <!-- RESULTS OF REQUESTS -->
+
+      <record model="ir.ui.view" id="update_student_result_view_list">
+         <field name="model">students</field>
+         <field name="type">tree</field>
+         <field name="name">students_results_list</field>
+      </record>
+
+      <record model="ir.action.act_window" id="act_student_result_list">
+         <field name="name">Results Students - IUC</field>
+         <field name="res_model">students</field>
+      </record>
+      <record model="ir.action.act_window.view" id="act_student_result_form_view1">
+         <field name="sequence" eval="10"/>
+         <field name="view" ref="update_student_result_view_list"/>
+         <field name="act_window" ref="act_student_result_list"/>
+      </record>
+      <record model="ir.action.act_window.view" id="act_student_result_form_view2">
+         <field name="sequence" eval="20"/>
+         <field name="view" ref="update_student_result_view_list"/>
+         <field name="act_window" ref="act_student_result_list"/>
+      </record>
+
+      <menuitem
+         parent="menu_update_student"
+         action="act_student_result_list"
+         sequence="20"
+         id="menu_student_result_form"/>
+
+      
+      <!-- UPDATE ACTION OF ACTION  -->
+            
+      <record model="ir.action.wizard" id="act_update_students_verify">
+         <field name="name">Updates Students</field>
+         <field name="wiz_name">url.parameters.start</field>
+         
+      </record>
+
+      <record model="ir.action.keyword" id="act_update_students_keyword">
+         <field name="keyword">form_action</field>
+         <field name="model">url.parameters,-1</field>
+         <field name="action" ref="act_update_students_verify"/>
+      </record>
+
+      <menuitem
+         parent="menu_update_student"
+         action="act_update_students_verify"
+         sequence="30"
+         id="menu_student_update"/>
+
+      <!-- UPLOAD STUDENT ACTION  -->
+
+      <record model="ir.action.wizard" id="act_upload_students">
+         <field name="name">Upload Students</field>
+         <field name="wiz_name">upload.students.start</field>
+         <field name="model">students</field>
+      </record>
+
+      <record model="ir.action.keyword" id="act_upload_students_keyword">
+         <field name="keyword">form_action</field>
+         <field name="model">url.parameters,-1</field>
+         <field name="action" ref="act_update_students_verify"/>
+      </record>
+      
+   </data>
+</tryton>
