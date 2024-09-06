@@ -1,5 +1,117 @@
 <?xml version="1.0"?>
 <tryton>
     <data>
+        <record model="ir.ui.view" id="parameter_list">
+         <field name="model">parameters.reports</field>
+         <field name="type">tree</field>
+         <field name="name">parameters_tree</field>
+        </record>
+        <record model="ir.ui.view" id="parameter_form">
+         <field name="model">parameters.reports</field>
+         <field name="type">form</field>
+         <field name="name">parameters_form</field>
+        </record>
+
+        <record model="ir.ui.view" id="products_by_age_list">
+         <field name="model">products.age.reports</field>
+         <field name="type">tree</field>
+         <field name="name">products_by_age</field>
+        </record>
+
+        <record model="ir.ui.view" id="products_by_date_list">
+         <field name="model">products.number.reports</field>
+         <field name="type">tree</field>
+         <field name="name">products_by_date</field>
+        </record>
+
+        <record model="ir.ui.view" id="products_by_insurance_list">
+         <field name="model">products.insurance.reports</field>
+         <field name="type">tree</field>
+         <field name="name">products_by_insurance</field>
+        </record>
+
+        <record model="ir.action.act_window" id="act_parameters_list">
+         <field name="name">Paramètre de classements</field>
+         <field name="res_model">parameters.reports</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_parameters_list_view1">
+         <field name="sequence" eval="10"/>
+         <field name="view" ref="parameter_list"/>
+         <field name="act_window" ref="act_parameters_list"/>
+        </record>
+        <record model="ir.action.act_window.view" id="act_parameters_list_view2">
+         <field name="sequence" eval="20"/>
+         <field name="view" ref="parameter_form"/>
+         <field name="act_window" ref="act_parameters_list"/>
+        </record>
+
+        <record model="ir.action.act_window" id="act_products_report_age_list">
+         <field name="name">Classement Par Âge</field>
+         <field name="res_model">products.age.reports</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_products_reports_age_list_view1">
+         <field name="sequence" eval="10"/>
+         <field name="view" ref="products_by_age_list"/>
+         <field name="act_window" ref="act_products_report_list"/>
+        </record>
+
+        <record model="ir.action.act_window" id="act_products_report_date_list">
+         <field name="name">Classement Par Date</field>
+         <field name="res_model">products.number.reports</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_products_reports_date_list_view1">
+         <field name="sequence" eval="10"/>
+         <field name="view" ref="products_by_date_list"/>
+         <field name="act_window" ref="act_products_report_date_list"/>
+        </record>
+
+        <record model="ir.action.act_window" id="act_products_report_insurance_list">
+         <field name="name">Classement Par Compagnie Assurance</field>
+         <field name="res_model">products.insurance.reports</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_products_reports_insurance_list_view1">
+         <field name="sequence" eval="10"/>
+         <field name="view" ref="products_by_insurance_list"/>
+         <field name="act_window" ref="act_products_report_insurance_list"/>
+        </record>
+
+        <menuitem
+         name="All Reports"
+         sequence="50"
+         id="menu_Reports"/>
+        <menuitem
+         parent="menu_Reports"
+         action="act_parameters_list"
+         sequence="30"
+         id="menu_parameters"/>
+        <menuitem
+         parent="menu_Reports"
+         action="act_products_report_age_list"
+         sequence="10"
+         id="menu_products_reports_age"/>
+        <menuitem
+         parent="menu_Reports"
+         action="act_products_report_date_list"
+         sequence="20"
+         id="menu_products_reports_date"/>
+        <menuitem
+         parent="menu_Reports"
+         action="act_products_report_insurance_list"
+         sequence="30"
+         id="menu_products_reports_insurance"/>
+
+        <!-- UPDATE ACTION OF ACTION  -->
+            
+        <record model="ir.action.wizard" id="act_update_parameters_verify">
+         <field name="name">Load Reports</field>
+         <field name="wiz_name">url.parameters.reports.start</field>  
+        </record>
+
+        <record model="ir.action.keyword" id="act_update_parameters_keyword">
+         <field name="keyword">form_action</field>
+         <field name="model">parameters.reports,-1</field>
+         <field name="action" ref="act_update_parameters_verify"/>
+        </record>
+
     </data>
 </tryton>
