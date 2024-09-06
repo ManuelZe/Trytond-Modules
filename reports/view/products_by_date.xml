@@ -1,0 +1,6 @@
+<tree>
+   <field name="product"/>
+   <field name="nombre"/>
+   <field name="prix_u"/>
+   <field name="prix_t"/>
+</tree>

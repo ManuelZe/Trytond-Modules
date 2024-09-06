@@ -1,0 +1,16 @@
+<form>
+   <label name="start_date"/>
+   <field name="start_date"/>
+   <label name="end_date"/>
+   <field name="end_date"/>
+   <label name="product"/>
+   <field name="product"/>
+   <label name="assurance"/>
+   <field name="assurance"/>
+   <label name="by_age"/>
+   <field name="by_age"/>
+   <label name="by_date"/>
+   <field name="by_date"/>
+   <label name="by_insurance"/>
+   <field name="by_insurance"/>
+</form>

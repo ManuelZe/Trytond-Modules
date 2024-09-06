@@ -14,9 +14,7 @@ def register():
         account_report.Products_Insurance,
         account_report.Products_Age,
         account_report.Parameters_Load,
-        module='account_report', type_='model'
-    )
-
+        module='account_report', type_='model')
     Pool.register(
         account_report.UpdateSelection,
         module='account_report', type_='wizard')

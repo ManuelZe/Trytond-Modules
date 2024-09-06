@@ -1,0 +1,3 @@
+Pour créer un nouveau modules il suffit de faire
+
+cookiecutter https://github.com/tryton/cookiecutter-tryton
