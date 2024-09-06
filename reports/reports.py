@@ -70,7 +70,7 @@ class UpdateSelection(Wizard):
     __name__ = 'parameters.reports.start'
 
     start_state = 'open_'
-    open_ = StateAction('students.act_update_parameters_verify')
+    open_ = StateAction('reports.act_update_parameters_verify')
 
     def age(dob):
         today = datetime.today().date()

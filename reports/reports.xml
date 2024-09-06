@@ -111,7 +111,7 @@
         <record model="ir.action.keyword" id="act_update_parameters_keyword">
          <field name="keyword">form_action</field>
          <field name="action" ref="act_update_parameters_verify"/>
-         <field name="model">parameters.reports.start, -1</field>
+         <field name="model">parameters.reports, -1</field>
         </record>
 
     </data>

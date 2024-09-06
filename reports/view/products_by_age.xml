@@ -1,5 +1,5 @@
 <tree>
-   <field name="products"/>
+   <field name="product"/>
    <field name="average_age"/>
    <field name="min_age"/>
    <field name="max_age"/>
