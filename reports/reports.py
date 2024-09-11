@@ -47,8 +47,8 @@ class Parameters_Load(ModelSQL, ModelView) :
     __name__ = 'parameters.reports'
     _rec_name = 'products'
 
-    start_date = fields.Date("Date de Début", required=True)
-    end_date = fields.Date("Date de fin", required=True)
+    start_date = fields.DateTime("Date de Début", required=True)
+    end_date = fields.DateTime("Date de fin", required=True)
     product = fields.Many2One(
         'product.product', "Produit", select=True,
         help="The product that defines the common properties "
@@ -97,12 +97,55 @@ class UpdateSelection(Wizard):
         results = []
         all_parameters = R_parameters.browse(Transaction().context.get('active_ids'))
         for parameter in all_parameters:
+            if parameter.by_date :
+                Results = pool.get("products.number.reports")
+                Requests = pool.get("account.invoice.line")
+
+                invoice_lines = Requests.search([('create_date', '>=', parameter.start_date), ('create_date', '<=', parameter.end_date),('product.template.name', '=', parameter.product.template.name), ('invoice.state', '=', 'paid')])
+
+                print("longueur des éléments invoice line ", invoice_lines)
+                dict_of_product = {}
+                list_of_element = []
+                dict_of_product[parameter.product.template.name] = list_of_element
+
+
+                for invoice_line in invoice_lines :
+                    print('le détail -------- ', invoice_line.invoice.number," ------------- ", invoice_line.invoice.party.name +" "+invoice_line.invoice.party.lastname, invoice_line.invoice.invoice_date)
+                    if dict_of_product[parameter.product.template.name] == [] :
+                        list_of_element.append(invoice_line.quantity)
+                        list_of_element.append(invoice_line.unit_price)
+                        list_of_element.append(float(list_of_element[0])*float(list_of_element[1]))
+                        list_of_element.append(invoice_line.invoice.number)
+                        list_of_element.append(invoice_line.invoice.party.name +" "+invoice_line.invoice.party.lastname)
+                        list_of_element.append(invoice_line.invoice.invoice_date)
+                        dict_of_product[parameter.product.template.name] = list_of_element
+                    else :
+                        dict_of_product[parameter.product.template.name][0] = dict_of_product[parameter.product.template.name][0] + invoice_line.quantity
+                        dict_of_product[parameter.product.template.name][2] = float(dict_of_product[parameter.product.template.name][2]) + float(invoice_line.unit_price)
+
+                results = []
+
+                if dict_of_product[parameter.product.template.name] != [] :
+                    result1 = {
+                        'product' : parameter.product.template.name,
+                        'nombre' : dict_of_product[parameter.product.template.name][0],
+                        'prix_u' : dict_of_product[parameter.product.template.name][1],
+                        'prix_t' : dict_of_product[parameter.product.template.name][2],
+                    }
+
+                    results.append(result1)
+
+                    Results.create(results)
+
+                    return results
+
             if parameter.by_age :
                 Results = pool.get("products.age")
                 Requests = pool.get("account.invoice.line")
 
-                invoice_lines = Requests.search([('create_date'.strftime("%Y-%m-%d"), 'in', (parameter.start_date, parameter.end_date)), ('product.description', '=', parameter.product)])
+                invoice_lines = Requests.search([('create_date', '>=', parameter.start_date), ('create_date', '<=', parameter.end_date), ('product.description', '=', parameter.product.description), ('invoice.state', '=', 'paid')])
 
+                print("longueur Longueur ", len(invoice_lines))
                 dict_of_product_age = {}
                 # Format de la liste des éléments
                 # [age_moyen, age_minimum, age_maximum]
@@ -111,13 +154,13 @@ class UpdateSelection(Wizard):
                     list_of_age = []
                     inv = Invoice(invoice_line.invoice)
                     if dict_of_product_age == {} :
-                        list_of_age.append(self.age(inv.party.dob))
+                        list_of_age.append(UpdateSelection.age(inv.party.dob))
                         dict_of_product_age[invoice_line.product.template.name] = list_of_age
                     else :
                         if invoice_line.product.template.name in dict_of_product_age :
-                            dict_of_product_age[invoice_line.product.template.name].append(self.age(inv.party.dob))
+                            dict_of_product_age[invoice_line.product.template.name].append(UpdateSelection.age(inv.party.dob))
                         else :
-                            list_of_age.append(self.age(inv.party.dob))
+                            list_of_age.append(UpdateSelection.age(inv.party.dob))
                             dict_of_product_age[invoice_line.product.template.name] = list_of_age
 
                 for elt in dict_of_product_age :
@@ -138,6 +181,8 @@ class UpdateSelection(Wizard):
                     }
                     results.append(result1)
                     Results.create(results)
+
+                    print('Les résultats ------- ', dict_of_product_age)
 
                     return results
 

@@ -74,6 +74,7 @@ class UploadToParty(Wizard) :
         pool = Pool()
         Party = pool.get('party.party')
         Student = pool.get('students')
+        Address = pool.get('party.address')
 
         partie = []
         for id in Transaction().context.get('active_ids') :
@@ -88,7 +89,16 @@ class UploadToParty(Wizard) :
                 'fed_country' : stud.matricule,
             }
             partie.append(partie2)
-        Party.create(partie)
+
+        address = []
+        for party in partie :
+            elt = Party.create([party])
+            party_id = elt[0].id
+            address_party = {
+                'party' : party_id
+            }
+            Address.create([address_party])
+        #Party.create(partie)
 
         return partie2
 
@@ -106,7 +116,7 @@ class UpdateStartMAJ(Wizard) :
         Request = pool.get('url.parameters')
         Result = pool.get('students')
 
-        base_url = 'https://iuc-api-aca.bitang.net/api/student/v1/PAYMENTS'
+        base_url = 'https://b2i-aca-api.bitang.net/api/student/v1/PAYMENTS'
         results = []
         requestes = Request.browse(Transaction().context.get('active_ids'))
         for request in requestes:
@@ -124,12 +134,14 @@ class UpdateStartMAJ(Wizard) :
 
             response = requests.get(base_url, params=params)
 
+            print("Response --- ", len(response.json()))
+
             if response.status_code == 200:
                 students2 = []
                 response_json = response.json()
                 for elt in response_json:
                     print("Les différents éléments ------------- ", elt["Payment_Reason_Name"])
-                    if elt["Payment_Reason_Name"] == "FRAIS MEDICAUX / MEDICAL FEES" :
+                    if elt["Payment_Reason_Name"] == "FRAIS MEDICAUX/MEDICAL FEES" :
                         date_string = elt["Student_Birth_Date"].replace('T', ' ')
                         date = datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
                         stud = Students.search([('matricule', '=', elt["Student_ID_Academy"])])

@@ -1,33 +1,30 @@
-#!/usr/bin/env vpython3
-# *-* coding: utf-8 *-*
-import datetime
-from cryptography.hazmat import backends
-from cryptography.hazmat.primitives.serialization import pkcs12
-from endesive.pdf import pdf
+import json
+import urllib.parse
+import requests
 
+# URL de base
+base_url = 'https://iuc-api-aca.bitang.net/api/student/v1/PAYMENTS'
 
-def main():
-    date = datetime.datetime.utcnow() - datetime.timedelta(hours=12)
-    date = date.strftime('%Y%m%d%H%M%S+00\'00\'')
-    dct = {
-        'sigflags': 3,
-        'contact': 'mak@trisoft.com.pl',
-        'location': 'Szczecin',
-        'signingdate': date,
-        'reason': 'Dokument podpisany cyfrowo',
-    }
-    with open('demo2_user1.p12', 'rb') as fp:
-        p12 = pkcs12.load_key_and_certificates(fp.read(), b'1234', backends.default_backend())
-    doc = pdf.FPDF()
-    doc.pkcs11_setup(dct,
-        p12[0], p12[1], p12[2],
-        'sha256'
-    )
-    for i in range(2):
-        doc.add_page()
-        doc.set_font('helvetica', '', 13.0)
-        doc.cell(w=75.0, h=22.0, align='C', txt='Hello, world page=%d.' % i, border=0, ln=0)
-    doc.output('pdf-signed-fpdf.pdf', "F")
+params = {
+    'Year': '2023-2024',
+    'SchoolID': 'IUC',
+    'ClassID': 'BTS1 CGE/J B',
+    'StudentID': '',
+    'IncludeValidPayments': 'true',
+    'IncludeDraftPayments': 'false',
+    'IncludeCancelledPayments': 'false',
+    'IncludeReductions': 'false',
+    'ApiKey': 'iucTEST284GUIiji74411zd8zd7878785zdz7'
+}
 
+response = requests.get(base_url, params=params)
 
-main()
+# Vérification du statut de la réponse
+if response.status_code == 200:
+    # Parsing de la réponse JSON
+    response_json = response.json()
+    # Affichage du JSON de manière lisible
+    print(type(response_json[0]['Student_Birth_Date']))
+    print(json.dumps(response_json[0], indent=4))
+else:
+    print(f"Erreur: {response.status_code}")
