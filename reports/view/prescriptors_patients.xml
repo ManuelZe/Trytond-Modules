@@ -1,0 +1,5 @@
+<tree>
+   <field name="prescriptor"/>
+   <field name="nombre"/>
+   <field name="dict_prescriptor_patient"/>
+</tree>

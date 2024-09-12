@@ -30,6 +30,12 @@
          <field name="name">products_by_insurance</field>
         </record>
 
+        <record model="ir.ui.view" id="prescriptor_patient">
+         <field name="model">prescriptors.patients</field>
+         <field name="type">tree</field>
+         <field name="name">prescriptors_patients</field>
+        </record>
+
         <record model="ir.action.act_window" id="act_parameters_list">
          <field name="name">Paramètre de classements</field>
          <field name="res_model">parameters.reports</field>
@@ -75,6 +81,16 @@
          <field name="act_window" ref="act_products_report_insurance_list"/>
         </record>
 
+        <record model="ir.action.act_window" id="act_report_prescriptor_list">
+         <field name="name">Prescripteurs - Patients</field>
+         <field name="res_model">prescriptors.patients</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_prescriptors_reports_list_view1">
+         <field name="sequence" eval="10"/>
+         <field name="view" ref="prescriptor_patient"/>
+         <field name="act_window" ref="act_report_prescriptor_list"/>
+        </record>
+
         <menuitem
          name="All Reports"
          sequence="50"
@@ -99,6 +115,12 @@
          action="act_products_report_insurance_list"
          sequence="30"
          id="menu_products_reports_insurance"/>
+
+        <menuitem
+         parent="menu_Reports"
+         action="act_report_prescriptor_list"
+         sequence="40"
+         id="menu_prescriptor_reports"/>
 
         <!-- UPDATE ACTION OF ACTION  -->
             

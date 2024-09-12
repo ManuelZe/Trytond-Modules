@@ -10,6 +10,7 @@ def register():
         reports.Parameters_Load,
         reports.Products_Date,
         reports.Products_Insurance,
+        reports.Prescriptors_Patients,
         module='reports', type_='model')
     Pool.register(
         reports.UpdateSelection,

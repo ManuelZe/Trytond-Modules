@@ -12,6 +12,7 @@ from datetime import datetime
 from trytond.pool import Pool
 from dateutil.relativedelta import relativedelta
 from trytond.transaction import Transaction
+import json
 
 class Products_Date(ModelSQL, ModelView):
     "Number of times a product is used over a period of time"
@@ -41,6 +42,14 @@ class Products_Age(ModelSQL, ModelView):
     min_age = fields.Integer("Age Minimum")
     max_age = fields.Integer("Age Maximun")
 
+class Prescriptors_Patients(ModelSQL, ModelView):
+    "Classement des Prescripteurs par patients"
+    __name__ = 'prescriptors.patients'
+    _recname = 'prescriptors'
+
+    prescriptor = fields.Char('Prescripteur')
+    nombre = fields.Float("Nombre de patients")
+    dict_prescriptor_patient = fields.Dict(fields.Char("Données Identiques"), "Prescriptors")
 
 class Parameters_Load(ModelSQL, ModelView) :
     " Parameters of all requests "
@@ -64,6 +73,7 @@ class Parameters_Load(ModelSQL, ModelView) :
     by_age = fields.Boolean("Classement Par Âge")
     by_date = fields.Boolean("Classement Par Date")
     by_insurance = fields.Boolean("Classement Par Assurance")
+    by_prescriptor = fields.Boolean("Classement Par Prescripteurs")
 
 class UpdateSelection(Wizard):
     "Wizard to update easily the The Selected Report"
@@ -97,6 +107,68 @@ class UpdateSelection(Wizard):
         results = []
         all_parameters = R_parameters.browse(Transaction().context.get('active_ids'))
         for parameter in all_parameters:
+            if parameter.by_prescriptor :
+                Results = pool.get("prescriptors.patients")
+                Requests = pool.get("account.invoice")
+                Health_service = pool.get("gnuhealth.health_service")
+
+                invoices = Requests.search([('create_date', '>=', parameter.start_date), ('create_date', '<=', parameter.end_date), ('state', '=', 'paid')])
+                list_element_prescriptor = []
+                list_of_patient = []
+                dict_of_prescriptor = {}
+                # exemple de liste des prescripteurs
+                # "prod" : [["toto", "tata", "tikol", "fred"], 15]
+                for invoice in invoices :
+                    health_line = Health_service.search([('name', '=', invoice.reference)])
+                    for line in health_line:
+                        if line.patient.name.name != None and line.patient.name.lastname !=None :
+                            patient = line.patient.name.name+" "+line.patient.name.lastname
+                        if line.patient.name.name == None :
+                            patient = line.patient.name.lastname
+                        if line.patient.name.lastname == None :
+                            patient = line.patient.name.name    
+                        if line.requestor.name.name != None and line.requestor.name.lastname !=None:
+                            prescriptor = line.requestor.name.name+" "+line.requestor.name.lastname
+                        if line.requestor.name.name == None :
+                            prescriptor = line.requestor.name.lastname
+                        if line.requestor.name.lastname == None :
+                            prescriptor = line.requestor.name.name
+                        if dict_of_prescriptor == {}:
+                            list_of_patient.append(patient)
+                            list_element_prescriptor.append(list_of_patient)
+                            list_element_prescriptor.append(len(list_of_patient))
+                            dict_of_prescriptor[prescriptor] = list_element_prescriptor
+                        else:
+                            if prescriptor in dict_of_prescriptor.keys() :
+                                list_element_prescriptor = dict_of_prescriptor[prescriptor]
+                                if list_element_prescriptor != {} :
+                                    list_of_patient = dict_of_prescriptor[prescriptor][0]
+                                    if patient not in list_of_patient :
+                                        list_of_patient.append(patient)
+                                        list_element_prescriptor.append(list_of_patient)
+                                        list_element_prescriptor.append(len(list_of_patient))
+                                        dict_of_prescriptor[prescriptor] = list_element_prescriptor
+                            else:
+                                list_of_patient.append(patient)
+                                list_element_prescriptor.append(list_of_patient)
+                                list_element_prescriptor.append(len(list_of_patient))
+                                dict_of_prescriptor[prescriptor] = list_element_prescriptor
+
+                results = []
+                if dict_of_prescriptor != {} :
+                    for key, value in dict_of_prescriptor.items():
+                        result1 = {
+                            'prescriptor' : key,
+                            'nombre' : value[1],
+                            'dict_prescriptor_patient' : json.dumps(dict_of_prescriptor[key])
+                        }
+
+                        results.append[result1]
+                    Results.create(results)
+
+                    return results
+
+
             if parameter.by_date :
                 Results = pool.get("products.number.reports")
                 Requests = pool.get("account.invoice.line")

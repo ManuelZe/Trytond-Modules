@@ -13,4 +13,7 @@
    <field name="by_date"/>
    <label name="by_insurance"/>
    <field name="by_insurance"/>
+   <label name="by_prescriptor"/>
+   <field name="by_prescriptor"/>
+   
 </form>
