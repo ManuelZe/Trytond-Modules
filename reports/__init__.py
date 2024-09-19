@@ -11,6 +11,7 @@ def register():
         reports.Products_Date,
         reports.Products_Insurance,
         reports.Prescriptors_Patients,
+        reports.Results_Details,
         module='reports', type_='model')
     Pool.register(
         reports.UpdateSelection,

@@ -7,6 +7,10 @@
    <field name="product"/>
    <label name="assurance"/>
    <field name="assurance"/>
+   <label name="category"/>
+   <field name="category"/>
+   <label name="subcategory"/>
+   <field name="subcategory"/>
    <label name="by_age"/>
    <field name="by_age"/>
    <label name="by_date"/>
@@ -15,5 +19,6 @@
    <field name="by_insurance"/>
    <label name="by_prescriptor"/>
    <field name="by_prescriptor"/>
-   
+   <label name="by_category"/>
+   <field name="by_category"/>
 </form>

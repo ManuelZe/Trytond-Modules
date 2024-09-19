@@ -1,0 +1,7 @@
+<tree>
+  <field name="patient"/>
+  <field name="facture"/>
+  <field name="prescriptor"/>
+  <field name="product"/>
+  <field name="category"/>
+</tree>

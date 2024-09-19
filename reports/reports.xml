@@ -18,6 +18,12 @@
          <field name="name">products_by_age</field>
         </record>
 
+        <record model="ir.ui.view" id="report_detail_list">
+         <field name="model">results.details</field>
+         <field name="type">tree</field>
+         <field name="name">report_details</field>
+        </record>
+
         <record model="ir.ui.view" id="products_by_date_list">
          <field name="model">products.number.reports</field>
          <field name="type">tree</field>
@@ -49,6 +55,16 @@
          <field name="sequence" eval="20"/>
          <field name="view" ref="parameter_form"/>
          <field name="act_window" ref="act_parameters_list"/>
+        </record>
+
+        <record model="ir.action.act_window" id="act_report_detail_list">
+         <field name="name">Details</field>
+         <field name="res_model">results.details</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_reports_detail_list_view1">
+         <field name="sequence" eval="10"/>
+         <field name="view" ref="report_detail_list"/>
+         <field name="act_window" ref="act_report_detail_list"/>
         </record>
 
         <record model="ir.action.act_window" id="act_products_report_age_list">
@@ -115,12 +131,16 @@
          action="act_products_report_insurance_list"
          sequence="30"
          id="menu_products_reports_insurance"/>
-
         <menuitem
          parent="menu_Reports"
          action="act_report_prescriptor_list"
          sequence="40"
          id="menu_prescriptor_reports"/>
+        <menuitem
+         parent="menu_Reports"
+         action="act_report_detail_list"
+         sequence="40"
+         id="menu_report_details"/>
 
         <!-- UPDATE ACTION OF ACTION  -->
             

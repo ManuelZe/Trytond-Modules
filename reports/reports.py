@@ -42,10 +42,22 @@ class Products_Age(ModelSQL, ModelView):
     min_age = fields.Integer("Age Minimum")
     max_age = fields.Integer("Age Maximun")
 
+class Results_Details(ModelSQL, ModelView):
+    "Les différents détails de presques tout"
+    __name__ = 'results.details'
+    _recname = 'patient'
+
+    patient = fields.Char("Patient")
+    facture = fields.Char("Numero de Facture")
+    product = fields.Char("Produit")
+    prescriptor = fields.Char("Prescripteur")
+    category = fields.Char("Categorie")
+
+
 class Prescriptors_Patients(ModelSQL, ModelView):
     "Classement des Prescripteurs par patients"
     __name__ = 'prescriptors.patients'
-    _recname = 'prescriptors'
+    _recname = 'prescriptor'
 
     prescriptor = fields.Char('Prescripteur')
     nombre = fields.Float("Nombre de patients")
@@ -54,7 +66,7 @@ class Prescriptors_Patients(ModelSQL, ModelView):
 class Parameters_Load(ModelSQL, ModelView) :
     " Parameters of all requests "
     __name__ = 'parameters.reports'
-    _rec_name = 'products'
+    _rec_name = 'product'
 
     start_date = fields.DateTime("Date de Début", required=True)
     end_date = fields.DateTime("Date de fin", required=True)
@@ -62,6 +74,15 @@ class Parameters_Load(ModelSQL, ModelView) :
         'product.product', "Produit", select=True,
         help="The product that defines the common properties "
         "inherited by the variant.")
+    category = fields.Many2One(
+        'product.category', "Categorie des Produits",
+        required=False, select=True,
+        help="La Catégorie Utilisée Pour le classement."
+    )
+    subcategory = fields.Many2One(
+        'product.category', 'Sous-catégorie',
+        domain=[('parent', '!=', None)]
+    )
     assurance = fields.Many2One(
         'party.party', "Assurance",
         required=False, select=True,
@@ -74,6 +95,8 @@ class Parameters_Load(ModelSQL, ModelView) :
     by_date = fields.Boolean("Classement Par Date")
     by_insurance = fields.Boolean("Classement Par Assurance")
     by_prescriptor = fields.Boolean("Classement Par Prescripteurs")
+    by_category = fields.Boolean("Classement Par Catégorie")
+
 
 class UpdateSelection(Wizard):
     "Wizard to update easily the The Selected Report"
@@ -107,9 +130,63 @@ class UpdateSelection(Wizard):
         results = []
         all_parameters = R_parameters.browse(Transaction().context.get('active_ids'))
         for parameter in all_parameters:
+            if parameter.by_category :
+                Product = pool.get('product.product')
+                InvoiceLine = pool.get('account.invoice.line')
+                Invoice = pool.get('account.invoice')
+                Patient = Pool().get('gnuhealth.patient')
+                Details = pool.get("results.details")
+
+                domain = [('create_date', '>=', parameter.start_date), ('create_date', '<=', parameter.end_date), ('invoice.state', '=', 'paid')]
+
+                if parameter.subcategory:
+                    domain.append(('product.template.account_category', '=', parameter.subcategory))
+                if parameter.category:
+                    domain.append(('product.template.account_category', '=', parameter.category))
+
+                invoices_lines = InvoiceLine.search(domain)
+                print("invoice lines -- ", parameter.category)
+
+                if not invoices_lines:
+                    return []
+
+                result = {}
+                Result = []
+
+                for line in invoices_lines:
+                    patient_name = line.invoice.party.name or ''
+                    patient_lastname = line.invoice.party.lastname or ''
+                    if patient_name and patient_lastname:
+                        patient = f"{patient_name} {patient_lastname}"
+                    else:
+                        patient = patient_name or patient_lastname
+
+                    if parameter.subcategory == None:
+                        category = parameter.category
+                    elif parameter.category == None:
+                        category = parameter.subcategory
+                    else :
+                        category = parameter.subcategory
+
+                    product = line.product.template.name
+                    facture = line.invoice.number
+
+                    result = {
+                        "patient" : patient,
+                        "product" : product,
+                        "category" : category.name,
+                        "facture" : facture,
+                    }
+
+                    Result.append(result)
+
+                    Details.create(Result)
+
+
             if parameter.by_prescriptor :
                 Results = pool.get("prescriptors.patients")
                 Requests = pool.get("account.invoice")
+                Details = pool.get("results.details")
                 Health_service = pool.get("gnuhealth.health_service")
 
                 invoices = Requests.search([('create_date', '>=', parameter.start_date), ('create_date', '<=', parameter.end_date), ('state', '=', 'paid')])
@@ -119,20 +196,33 @@ class UpdateSelection(Wizard):
                 # exemple de liste des prescripteurs
                 # "prod" : [["toto", "tata", "tikol", "fred"], 15]
                 for invoice in invoices :
+                    element_of_details = []
+                    dict_of_detail = {}
                     health_line = Health_service.search([('name', '=', invoice.reference)])
                     for line in health_line:
-                        if line.patient.name.name != None and line.patient.name.lastname !=None :
+                        if line.patient.name.name != None and line.patient.name.lastname != None :
                             patient = line.patient.name.name+" "+line.patient.name.lastname
                         if line.patient.name.name == None :
                             patient = line.patient.name.lastname
                         if line.patient.name.lastname == None :
-                            patient = line.patient.name.name    
-                        if line.requestor.name.name != None and line.requestor.name.lastname !=None:
+                            patient = line.patient.name.name
+                        if line.requestor.name.name != None and line.requestor.name.lastname != None :
                             prescriptor = line.requestor.name.name+" "+line.requestor.name.lastname
                         if line.requestor.name.name == None :
                             prescriptor = line.requestor.name.lastname
                         if line.requestor.name.lastname == None :
                             prescriptor = line.requestor.name.name
+
+                        if dict_of_detail == {} :
+                            dict_of_detail = {
+                                "prescriptor" : prescriptor,
+                                "facture" : invoice.number,
+                                "patient" : patient,
+                            }
+                            element_of_details.append(dict_of_detail)
+
+                            Details.create(element_of_details)
+
                         if dict_of_prescriptor == {}:
                             list_of_patient.append(patient)
                             list_element_prescriptor.append(list_of_patient)
@@ -140,15 +230,16 @@ class UpdateSelection(Wizard):
                             dict_of_prescriptor[prescriptor] = list_element_prescriptor
                         else:
                             if prescriptor in dict_of_prescriptor.keys() :
+                                #print("le prescriptor ---- ", dict_of_prescriptor)
                                 list_element_prescriptor = dict_of_prescriptor[prescriptor]
-                                if list_element_prescriptor != {} :
-                                    list_of_patient = dict_of_prescriptor[prescriptor][0]
-                                    if patient not in list_of_patient :
-                                        list_of_patient.append(patient)
-                                        list_element_prescriptor.append(list_of_patient)
-                                        list_element_prescriptor.append(len(list_of_patient))
-                                        dict_of_prescriptor[prescriptor] = list_element_prescriptor
+                                list_of_patient = list_element_prescriptor[0]
+                                if patient not in list_of_patient :
+                                    list_of_patient.append(patient)
+                                    list_element_prescriptor[1] = len(list_of_patient)
+                                    dict_of_prescriptor[prescriptor] = list_element_prescriptor
                             else:
+                                list_element_prescriptor = []
+                                list_of_patient = []
                                 list_of_patient.append(patient)
                                 list_element_prescriptor.append(list_of_patient)
                                 list_element_prescriptor.append(len(list_of_patient))
@@ -157,13 +248,20 @@ class UpdateSelection(Wizard):
                 results = []
                 if dict_of_prescriptor != {} :
                     for key, value in dict_of_prescriptor.items():
+
+                        d = {}
+
+                        if key not in d:
+                            d[key] = value[0]
+
                         result1 = {
                             'prescriptor' : key,
                             'nombre' : value[1],
-                            'dict_prescriptor_patient' : json.dumps(dict_of_prescriptor[key])
+                            'dict_prescriptor_patient' : d
                         }
 
-                        results.append[result1]
+                        results.append(result1)
+
                     Results.create(results)
 
                     return results
